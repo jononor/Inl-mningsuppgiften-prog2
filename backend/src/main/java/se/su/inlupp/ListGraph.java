@@ -1,59 +1,121 @@
 package se.su.inlupp;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class ListGraph<T> implements Graph<T> {
 
+  private Map<T, List<Edge<T>>>  graph = new HashMap<>();
+
   @Override
   public void add(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'add'");
+    graph.putIfAbsent(node, new ArrayList<>());
   }
 
   @Override
   public void remove(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'remove'");
+    if (!graph.containsKey(node)){
+      throw new NoSuchElementException();
+    }
+    for (T otherNode : graph.keySet()) {
+      List<Edge<T>> edges = graph.get(otherNode);
+      Iterator<Edge<T>> iterator = edges.iterator();
+
+      while (iterator.hasNext()) {
+        Edge<T> edge = iterator.next();
+
+        if (edge.getDestination().equals(node)) {
+          iterator.remove();
+        }
+      }
+    }
+    graph.remove(node);
   }
 
   @Override
   public boolean hasNode(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'hasNode'");
+    return graph.containsKey(node);
   }
 
   @Override
   public void connect(T node1, T node2, String name, int weight) {
-    throw new UnsupportedOperationException("Unimplemented method 'connect'");
+    if (!graph.containsKey(node1) || !graph.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+    if (weight <0) {
+      throw new IllegalArgumentException();
+    }
+    if (getEdgeBetween(node1, node2) != null) {
+      throw  new IllegalStateException();
+    }
+
+    Edge<T> edge1 = new Edgee<>(node2, name, weight);
+    Edge<T> edge2 = new Edgee<>(node1, name, weight);
+
+    graph.get(node1).add(edge1);
+    graph.get(node2).add(edge2);
   }
 
   @Override
   public void disconnect(T node1, T node2) {
-    throw new UnsupportedOperationException("Unimplemented method 'disconnect'");
+    if(!graph.containsKey(node1) || !graph.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+
+    if(getEdgeBetween(node1, node2) == null) {
+      throw new IllegalStateException();
+    }
+    graph.get(node1).removeIf(e -> e.getDestination().equals(node2));
+    graph.get(node2).removeIf(e -> e.getDestination().equals(node1));
   }
 
   @Override
   public void setConnectionWeight(T node1, T node2, int weight) {
-    throw new UnsupportedOperationException("Unimplemented method 'setConnectionWeight'");
+    if (!graph.containsKey(node1) || !graph.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+    if (weight < 0) {
+      throw new IllegalArgumentException();
+    }
+    Edge<T> e1 = getEdgeBetween(node1, node2);
+    Edge<T> e2 = getEdgeBetween(node2, node1);
+
+    if (e1 == null || e2 == null) {
+      throw new NoSuchElementException();
+    }
+    e1.setWeight(weight);
+    e2.setWeight(weight);
   }
 
   @Override
   public Set<T> getNodes() {
-    throw new UnsupportedOperationException("Unimplemented method 'getNodes'");
+    return new HashSet<>(graph.keySet());
   }
 
   @Override
   public Collection<Edge<T>> getEdgesFrom(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'getEdgesFrom'");
+    if (!graph.containsKey(node)) {
+      throw new NoSuchElementException();
+    }
+    return new ArrayList<>(graph.get(node));
   }
 
   @Override
   public Edge<T> getEdgeBetween(T node1, T node2) {
-    throw new UnsupportedOperationException("Unimplemented method 'getEdgeBetween'");
+    if (!graph.containsKey(node1) || !graph.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+
+    for (Edge<T> edge : graph.get(node1)) {
+      if(edge.getDestination().equals(node2)) {
+        return edge;
+      }
+    }
+    return null;
   }
 
   @Override
   public Iterator<T> iterator() {
-    throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+    return graph.keySet().iterator();
   }
 }
 

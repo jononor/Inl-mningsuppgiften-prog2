@@ -16,7 +16,7 @@ public class DFSPathFinder<T> implements PathFinder<T> {
       }
 
     } else {
-      throw new NullPointerException("Noderna måste finnas i grafen")
+      throw new NullPointerException("Noderna måste finnas i grafen");
     }
 
     return null;

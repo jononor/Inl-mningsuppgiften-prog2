@@ -66,6 +66,7 @@ public class Pathh<T> implements Path<T> {
     @Override
     public String toString() {
         String  str = "Start node:" + getStart() + " End node:" + getEnd() + " All nodes:" + getNodes() + " TotalWeight:" + getTotalWeight();
+        return str;
     }
 
 }
