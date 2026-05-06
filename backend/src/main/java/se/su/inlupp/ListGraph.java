@@ -117,5 +117,23 @@ public class ListGraph<T> implements Graph<T> {
   public Iterator<T> iterator() {
     return graph.keySet().iterator();
   }
+
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (T node : graph.keySet()) {
+      sb.append(node);
+      sb.append("\n");
+
+      for (Edge<T> edge : graph.get(node)) {
+        sb.append("\t");
+        sb.append(edge);
+        sb.append("\n");
+      }
+      sb.append("\n");
+    }
+    return sb.toString();
+  }
+
 }
+
 
