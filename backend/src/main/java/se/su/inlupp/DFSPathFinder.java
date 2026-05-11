@@ -1,12 +1,16 @@
 package se.su.inlupp;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DFSPathFinder<T> implements PathFinder<T> {
 
   @Override
   public Path<T> findPath(Graph<T> graph, T from, T to) {
-    ArrayList<T> allNodes = (ArrayList<T>) graph.getNodes();
+
+    Set<T> set = graph.getNodes();
+    ArrayList<T> allNodes = new ArrayList<>(set);
     if (allNodes.contains(from) && allNodes.contains(to)) {
       ArrayList<T> visitedNodes = new ArrayList<T>();
       ArrayList<Edge<T>> visitedEdges = new ArrayList<>();
@@ -32,7 +36,5 @@ public class DFSPathFinder<T> implements PathFinder<T> {
       }
     }
   }
-
-
 }
 

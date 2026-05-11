@@ -36,6 +36,6 @@ public class Edgee<T> implements Edge<T> {
 
     @Override
     public String toString() {
-        return String.format("Edge %s [weight=%d, destination=%s]", name, weight, destination);
+        return String.format("till %s med %s tar %d",destination, name, weight);
     }
 }
