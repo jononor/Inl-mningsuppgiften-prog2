@@ -4,20 +4,18 @@ import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+
+import java.util.Optional;
 
 public class Gui extends Application {
 
@@ -76,13 +74,82 @@ public class Gui extends Application {
   private static class NewPlaceHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
+      TextField name = new TextField();
 
+      //Markerar en ny plats
+      /*
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Name");
+      alert.setHeaderText("Name of place:");
+      alert.getDialogPane().setContent(name);
+      alert.getDialogPane().setMinWidth(300);
+      Optional<ButtonType> result = alert.showAndWait();
+       */
     }
   }
 
   private static class NewConnectionHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
+      TextField name = new TextField();
+      TextField time = new TextField();
+
+      //Hanterar felet när användaren inte väljer två platser i kartan
+      /*
+      Alert noOrToMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+      noMarkedPlaceAlert.setTitle("Error!");
+      noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
+      noMarkedPlaceAlert.showAndWait();
+       */
+
+      //Hanterar felet när två städer är redan anslutna
+      /*
+      Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+      alreadyConnectedAlert.setTitle("Error!");
+      alreadyConnectedAlert.setHeaderText("The cities is already connected!");
+      alreadyConnectedAlert.showAndWait();
+       */
+
+
+      //Hanterar när två städer utan anslutning ska anslutas. Hanterar också fel.
+      /*
+      GridPane grid = new GridPane();
+      grid.add(new Label("Name:"), 0, 0);
+      grid.add(name, 1, 0);
+      grid.add(new Label("Time:"), 0, 1);
+      grid.add(time, 1, 1);
+      grid.setHgap(10);
+      grid.setVgap(10);
+      grid.setAlignment(Pos.CENTER);
+
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Connection");
+      alert.setHeaderText("Connection from city1 to city2");
+      alert.getDialogPane().setContent(grid);
+      alert.getDialogPane().setMinWidth(300);
+      Optional<ButtonType> result = alert.showAndWait();
+
+      if (result.get() == ButtonType.OK) {
+        String textName = name.getText();
+        String textTime = time.getText();
+        if (textName.isEmpty() || textTime.isEmpty()) {
+          Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+          alreadyConnectedAlert.setTitle("Error!");
+          alreadyConnectedAlert.setHeaderText("You muste enter a name and a time!");
+          alreadyConnectedAlert.showAndWait();
+          return;
+        }
+
+        try {
+          Integer.parseInt(textTime);
+        } catch (Exception e) {
+          Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+          alreadyConnectedAlert.setTitle("Error!");
+          alreadyConnectedAlert.setHeaderText("Enter only numbers");
+          alreadyConnectedAlert.showAndWait();
+        }
+      }
+      */
 
     }
   }
