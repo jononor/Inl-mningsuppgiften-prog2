@@ -17,6 +17,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
@@ -25,7 +26,10 @@ import java.io.File;
 import java.util.Optional;
 
 public class Gui extends Application {
-
+  /**
+   * Alla knappar och labels.
+   * De är globala eftersom klasser utanför start metod behöver komma åt dem.
+   */
   private Label fileLabel = new Label("File");
   private Button findPath =  new Button("Find Path");
   private Button showConnection = new Button("Show Connection");
@@ -33,25 +37,48 @@ public class Gui extends Application {
   private Button newConnection = new Button("New Connection");
   private Button changeConnection = new Button("Change Connection");
 
+  /**
+   * Globala variabler.
+   * Som används i start metoden och de privata klasserna.
+   */
   private Image background;
   private ImageView backgroundImage;
   private Pane center;
-
   private Scene scene;
   private Stage stage;
   private BorderPane root;
 
+  /**
+   * De två röda städerna som är markerade.
+   * Exempelvis om en stad är markerad röd så ligger staden i firstCityMarked variabeln.
+   * Exempelvis om två städer är markerade så ligger den andra staden i secondCityMarked variabeln.
+   */
   private CityPlace firstCityMarked, secondCityMarked;
+
+  /**
+   * Skapar en instans av klassen CityColorHandler som lagras i variabeln.
+   * Klassen hanterar vilken färg en stad ska ha.
+   * Man återanvänder instansen och skapar inte nya instanser varje gång man vill bara ändra färg.
+   * Instansvariabeln används i klassen NewPlaceHandler inre klass MapKlickHandler.
+   */
   private CityColorHandler cityColorHandler = new CityColorHandler();
 
+  /**
+   * Skapar en instans av klassen MapGraph som lagras i variabeln.
+   * Ideén är att återvända instansen istället för att skapa nya ListGraph.
+   * Klassen är en wrapper som hanterar backend ListGraph.
+   * ListGraph är backend logik som inte får förekomma i Gui.
+   * Kommunikation: Gui -> MapGraph -> ListGraph.
+   * Kolla i MapGraph om osäker.
+   */
+  private MapGraph mapGraph = new MapGraph();
 
   public void start(Stage stage) {
-
     this.stage = stage;
     stage.setTitle("Pathfinder");
     root = new BorderPane();
 
-
+    //Skapar BorderPanes top. Fyll med alla knappar och label.
     HBox top = new HBox();
     top.setAlignment(Pos.CENTER);
     top.setSpacing(15);
@@ -66,17 +93,15 @@ public class Gui extends Application {
     root.setTop(top);
 
     scene = new Scene(root);
+
+    //Stänger av alla knappar tills en bild har valts genom Labeln: File.
     findPath.setDisable(true);
     showConnection.setDisable(true);
     newPlace.setDisable(true);
     newConnection.setDisable(true);
     changeConnection.setDisable(true);
 
-
-    //logik för att vad som händer om man trycker på en blå eller röd cirkel
-    //det ska inte gå att markera två platser
-
-
+    //Sätter hanterare på alla knappar och label.
     fileLabel.setOnMousePressed(new FileLabelHandler());
     findPath.setOnAction(new FindPathHandler());
     showConnection.setOnAction(new ShowConnectionHandler());
@@ -92,6 +117,10 @@ public class Gui extends Application {
     launch(args);
   }
 
+  /**
+   * Användaren ska kunna välja en fil som ska läggas in i BorderPane center.
+   * FileLabelHandler ansvarar för att användaren kan göra det.
+   */
   private class FileLabelHandler implements EventHandler<MouseEvent> {
     @Override
     public void handle(MouseEvent event) {
@@ -117,30 +146,35 @@ public class Gui extends Application {
     }
   }
 
+  /**
+   * Användaren ska kunna söka igenom grafen efter en väg mellan två valda platser.
+   * FindPathHandler ansvarar för att användaren kan göra det.
+   */
   private class FindPathHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-
+      //Felmeddelande när användaren inte har valt två platser på kartan.
       if (firstCityMarked == null || secondCityMarked == null ) {
-        //Hanterar felet när användaren inte väljer två platser på kartan
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
         noMarkedPlaceAlert.showAndWait();
       }
 
-      //hanterar om det inte finns någon förbindelse mellan städerna
-      /*
-      Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
-      noMarkedPlaceAlert.setTitle("Error!");
-      noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
-      noMarkedPlaceAlert.showAndWait();
-      */
+      //Felmeddelande om det inte finns någon förbindelse mellan städerna.
+      if (mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked) == null) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
 
-      //Om användaren klickar på knappen "Find Path" efter att först markerat två plastser som har förbindelse
-      //Dialogrutan path skall innehålla all relevant information om resan
-      //Alltså var man börjar och slutar, vilka platser och förbindelser som passeras, hur lång tid varje delsträcka tar och hur lång tid resan tar totalt
-      /*
+      /**
+       * Lägg till rätt logik.
+       * Om användaren klickar på knappen "Find Path" efter att först markerat två plastser som har förbindelse.
+       * Var man börjar och slutar, vilka platser och förbindelser som passeras, hur lång tid varje delsträcka tar och hur lång tid resan tar totalt.
+       */
       TextArea path = new TextArea();
       TextField name = new TextField();
       TextField time = new TextField();
@@ -153,41 +187,42 @@ public class Gui extends Application {
 
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setTitle("Message");
-      alert.setHeaderText("The Path from city1 to city2");
+      alert.setHeaderText("The Path from " + firstCityMarked.getPlaceName() + " to " + secondCityMarked.getPlaceName());
       alert.getDialogPane().setContent(grid);
       alert.getDialogPane().setMinWidth(300);
       alert.showAndWait();
-       */
-
-
     }
   }
 
+  /**
+   * Användaren ska kunna se uppgifterna om förbindelsen mellan två valda platser.
+   * ShowConnectionHandler ansvarar för att användaren kan göra det.
+   */
   private class ShowConnectionHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-
+      //Felmeddelandet om användaren inte väljer två platser på kartan.
       if (firstCityMarked == null || secondCityMarked == null ) {
-        //Hanterar felet när användaren inte väljer två platser på kartan
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
         noMarkedPlaceAlert.showAndWait();
       }
 
+      //Felmeddelandet om det inte finns någon förbindelse mellan städerna.
+      if (mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked) == null) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
 
-      //hanterar om det inte finns någon förbindelse mellan städerna
-      /*
-      Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
-      noMarkedPlaceAlert.setTitle("Error!");
-      noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
-      noMarkedPlaceAlert.showAndWait();
-      */
-
-      //Om två platser har förbindelse så visas ett fönster med uppgifter om förbindelsens namn och tid.
-      //Fönstrets textrutor ska inte gå att redigera.
-      //Om användaren klickar på "OK" eller "Avslut" i detta fönster stängs det.
-      /*
+      /**
+       * Om två platser har förbindelse så visas uppgifter om förbindelsens namn och tid.
+       * Fönstrets textrutor ska inte gå att redigera.
+       * Om användaren klickar på "OK" eller "Avslut" i detta fönster stängs det.
+       */
       TextField name = new TextField();
       TextField time = new TextField();
 
@@ -202,15 +237,17 @@ public class Gui extends Application {
 
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setTitle("Connection");
-      alert.setHeaderText("Connection from city1 to city2");
+      alert.setHeaderText("Connection from " + firstCityMarked.getPlaceName() + " to " + secondCityMarked.getPlaceName());
       alert.getDialogPane().setContent(grid);
       alert.getDialogPane().setMinWidth(300);
       alert.showAndWait();
-       */
-
     }
   }
 
+  /**
+   * Användaren ska kunna lägga till en ny plats.
+   * NewPlaceHandler ansvarar för att användaren kan göra det.
+   */
   private class NewPlaceHandler implements EventHandler<ActionEvent> {
     private double x;
     private double y;
@@ -241,8 +278,11 @@ public class Gui extends Application {
 
           if (result.isPresent() && result.get() == ButtonType.OK) {
             String placeName  = name.getText();
+
             CityPlace newCityPlace = new CityPlace(x, y, placeName);
             newCityPlace.setOnMouseClicked(cityColorHandler);
+
+            mapGraph.add(newCityPlace);
             center.getChildren().add(newCityPlace);
             center.setStyle("-fx-font-weight: bold;");
           }
@@ -254,30 +294,31 @@ public class Gui extends Application {
     }
   }
 
+  /**
+   * Användaren ska kunna skapa nya förbindelser mellan två platser.
+   * NewConnectionHandler ansvarar för att användaren kan göra det.
+   */
   private class NewConnectionHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-
+      //Felmeddelandet om användaren inte väljer två platser på kartan.
       if (firstCityMarked == null || secondCityMarked == null ) {
-        //Hanterar felet när användaren inte väljer två platser på kartan
       Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
       noMarkedPlaceAlert.setTitle("Error!");
       noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
       noMarkedPlaceAlert.showAndWait();
       }
 
+      //Felmeddelandet om två städer är redan anslutna.
+      if (mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked) != null) {
+        Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+        alreadyConnectedAlert.setTitle("Error!");
+        alreadyConnectedAlert.setHeaderText("The cities is already connected!");
+        alreadyConnectedAlert.showAndWait();
+        return;
+      }
 
-      //Hanterar felet när två städer är redan anslutna
-      /*
-      Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
-      alreadyConnectedAlert.setTitle("Error!");
-      alreadyConnectedAlert.setHeaderText("The cities is already connected!");
-      alreadyConnectedAlert.showAndWait();
-       */
-
-
-      //Hanterar när två städer utan anslutning ska anslutas. Hanterar också fel.
-      /*
+      //Hanterar när två städer utan anslutning ska anslutas. Hanterar också fel med exception.
       TextField name = new TextField();
       TextField time = new TextField();
 
@@ -292,11 +333,10 @@ public class Gui extends Application {
 
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setTitle("Connection");
-      alert.setHeaderText("Connection from city1 to city2");
+      alert.setHeaderText("Connection from " + firstCityMarked.getPlaceName() + " to " + secondCityMarked.getPlaceName());
       alert.getDialogPane().setContent(grid);
       alert.getDialogPane().setMinWidth(300);
       Optional<ButtonType> result = alert.showAndWait();
-
       if (result.get() == ButtonType.OK) {
         String textName = name.getText();
         String textTime = time.getText();
@@ -307,9 +347,15 @@ public class Gui extends Application {
           alreadyConnectedAlert.showAndWait();
           return;
         }
-
         try {
-          Integer.parseInt(textTime);
+          int weight = Integer.parseInt(textTime);
+
+          Line connectionLine = new Line(firstCityMarked.getXValue(), firstCityMarked.getYValue(), secondCityMarked.getXValue(), secondCityMarked.getYValue());
+          connectionLine.setStroke(Color.BLACK);
+          connectionLine.setStrokeWidth(4);
+
+          mapGraph.connect(firstCityMarked, secondCityMarked, textName, weight);
+          center.getChildren().add(connectionLine);
         } catch (Exception e) {
           Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
           alreadyConnectedAlert.setTitle("Error!");
@@ -317,38 +363,40 @@ public class Gui extends Application {
           alreadyConnectedAlert.showAndWait();
         }
       }
-      */
-
     }
   }
 
+  /**
+   * Användaren ska kunna ändra tiden för en förbindelser.
+   * ChangeConnectionHandler ansvarar för att användaren kan göra det.
+   */
   private class ChangeConnectionHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-
+      //Felmeddelandet om användaren inte väljer två platser på kartan.
       if (firstCityMarked == null || secondCityMarked == null ) {
-        //Hanterar felet när användaren inte väljer två platser på kartan
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
         noMarkedPlaceAlert.showAndWait();
       }
 
+      //Felmeddelandet om det inte finns någon förbindelse mellan städerna.
+      if (mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked) == null) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
 
-      //hanterar om det inte finns någon förbindelse mellan städerna
-      /*
-      Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
-      noMarkedPlaceAlert.setTitle("Error!");
-      noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
-      noMarkedPlaceAlert.showAndWait();
-      */
-
-      //Om två platser har förbindelse så visas ett fönster med uppgifter om förbindelsens namn och det är möjligt för användaren att ändra tiden.
-      //Textrutan för namnet ska inte gå att redigera.
-      //Om användaren klickar på "OK" i fönstret sparas den nya tiden och fönstret stängs.
-      //Kom ihåg att grafen är oriktad, så ändringar åt ett håll måste speglas åt det andra hållet
-      //Om användaren klickar på "Cancel" stängs fönstret utan att några förändringar görs i förbindelsen.
-      /*
+      /**
+       * Om två platser har förbindelse så visas euppgifter om förbindelsens namn.
+       * Det är möjligt för användaren att ändra tiden.
+       * Textrutan för namnet ska inte gå att redigera.
+       * Om användaren klickar på "OK" i fönstret sparas den nya tiden och fönstret stängs.
+       * Om användaren klickar på "Cancel" stängs fönstret utan att några förändringar görs i förbindelsen.
+       */
       TextField name = new TextField();
       TextField time = new TextField();
 
@@ -363,15 +411,16 @@ public class Gui extends Application {
 
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setTitle("Connection");
-      alert.setHeaderText("Connection from city1 to city2");
+      alert.setHeaderText("Connection from " + firstCityMarked.getPlaceName() + " to " + secondCityMarked.getPlaceName());
       alert.getDialogPane().setContent(grid);
       alert.getDialogPane().setMinWidth(300);
       Optional<ButtonType> result = alert.showAndWait();
-       */
-
     }
   }
 
+  /**
+   * Klassen ansvarar för logiken bakom hur städernas färg ändras.
+   */
   private class CityColorHandler implements EventHandler<MouseEvent> {
     @Override
     public void handle(MouseEvent event) {
