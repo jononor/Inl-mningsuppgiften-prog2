@@ -162,7 +162,8 @@ public class Gui extends Application {
       }
 
       //Felmeddelande om det inte finns någon förbindelse mellan städerna.
-      if (mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked) == null) {
+      MapDFS dfs = new MapDFS();
+      if (dfs.findPath(mapGraph.getGraph(), firstCityMarked, secondCityMarked) == null) {
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("The selected places must be connected");
@@ -170,28 +171,86 @@ public class Gui extends Application {
         return;
       }
 
-      /**
-       * Lägg till rätt logik.
-       * Om användaren klickar på knappen "Find Path" efter att först markerat två plastser som har förbindelse.
-       * Var man börjar och slutar, vilka platser och förbindelser som passeras, hur lång tid varje delsträcka tar och hur lång tid resan tar totalt.
-       */
-      TextArea path = new TextArea();
-      TextField name = new TextField();
-      TextField time = new TextField();
+      //Frågar användaren vilken typ av sökning algoritm som ska användas.
+      TextField number = new TextField();
 
       GridPane grid = new GridPane();
-      grid.add(path, 0, 0);
+      grid.add(new Label("Nr 0 = dept first search. Nr 1 = breath first search"),0 , 0);
+
+      grid.add(number, 0, 1);
       grid.setHgap(10);
       grid.setVgap(10);
       grid.setAlignment(Pos.CENTER);
 
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setTitle("Message");
-      alert.setHeaderText("The Path from " + firstCityMarked.getPlaceName() + " to " + secondCityMarked.getPlaceName());
+      alert.setTitle("Choose algorithm");
+      alert.setHeaderText("Choose your brefered search algorithm, DFS (0) or BFS (1)");
       alert.getDialogPane().setContent(grid);
       alert.getDialogPane().setMinWidth(300);
-      alert.showAndWait();
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK) {
+        String textNumber = number.getText();
+        if (textNumber == null || textNumber.isEmpty()) {
+          Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+          alreadyConnectedAlert.setTitle("Error!");
+          alreadyConnectedAlert.setHeaderText("You need to enter a number between 0 and 1");
+          alreadyConnectedAlert.showAndWait();
+          return;
+        }
+        try {
+          int num = Integer.parseInt(textNumber);
+          if (num < 0 || num > 1) {
+            Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+            alreadyConnectedAlert.setTitle("Error!");
+            alreadyConnectedAlert.setHeaderText("you can only enter numbers between 0 and 1");
+            alreadyConnectedAlert.showAndWait();
+            return;
+          }
+          if (num == 0) {
+            MapPath path = new MapPath(dfs.findPath(mapGraph.getGraph(), firstCityMarked, secondCityMarked));
+            MapPathHandler(path);
+          } else if (num == 1) {
+            MapBFS bfs = new MapBFS();
+            MapPath path = new MapPath(bfs.findPath(mapGraph.getGraph(), firstCityMarked, secondCityMarked));
+            MapPathHandler(path);
+          }
+
+        } catch (Exception e) {
+          Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+          alreadyConnectedAlert.setTitle("Error!");
+          alreadyConnectedAlert.setHeaderText("you can only enter numbers");
+          alreadyConnectedAlert.showAndWait();
+        }
+      }
     }
+
+    /**
+     * Lägg till rätt logik.
+     * Om användaren klickar på knappen "Find Path" efter att först markerat två plastser som har förbindelse.
+     * Var man börjar och slutar, vilka platser och förbindelser som passeras, hur lång tid varje delsträcka tar och hur lång tid resan tar totalt.
+     */
+    private void MapPathHandler(MapPath path) {
+      TextArea textArea = new TextArea();
+      GridPane gridTextArea = new GridPane();
+      MapEdg edg = new MapEdg(path.getEdges());
+
+      textArea.setText(edg.toString());
+
+      textArea.appendText("Total " + path.getTotalWeight());
+
+      gridTextArea.add(textArea, 0, 0);
+      gridTextArea.setHgap(10);
+      gridTextArea.setVgap(10);
+      gridTextArea.setAlignment(Pos.CENTER);
+
+      Alert alertPath = new Alert(Alert.AlertType.CONFIRMATION);
+      alertPath.setTitle("Message");
+      alertPath.setHeaderText("The Path from " + firstCityMarked.getPlaceName() + " to " + secondCityMarked.getPlaceName());
+      alertPath.getDialogPane().setContent(gridTextArea);
+      alertPath.getDialogPane().setMinWidth(300);
+      alertPath.showAndWait();
+    }
+
   }
 
   /**

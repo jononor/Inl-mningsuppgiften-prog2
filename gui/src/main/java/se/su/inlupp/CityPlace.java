@@ -60,4 +60,8 @@ public class CityPlace extends Pane {
         return cityColor;
     }
 
+    @Override
+    public String toString() {
+        return placeName;
+    }
 }

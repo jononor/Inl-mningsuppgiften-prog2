@@ -45,6 +45,10 @@ public class MapGraph {
         return graph.getEdgeBetween(cityOne, cityTwo);
     }
 
+    public Graph<CityPlace> getGraph() {
+        return graph;
+    }
+
     public Iterator<CityPlace> iterator() {
         return graph.iterator();
     }

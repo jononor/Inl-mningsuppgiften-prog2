@@ -72,7 +72,7 @@ public class BFSPathFinder<T> implements PathFinder<T> {
     // edge; it's just where we started the search.
     edges.removeFirst();
 
-    return new Pathh<T>(
+    return new Pathh(
         nodes.getFirst(),
         nodes.getLast(),
         nodes,

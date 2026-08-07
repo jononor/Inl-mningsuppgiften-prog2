@@ -6,6 +6,8 @@ import java.util.Set;
 
 public class DFSPathFinder<T> implements PathFinder<T> {
 
+  private boolean found;
+
   @Override
   public Path<T> findPath(Graph<T> graph, T from, T to) {
 
@@ -14,9 +16,11 @@ public class DFSPathFinder<T> implements PathFinder<T> {
     if (allNodes.contains(from) && allNodes.contains(to)) {
       ArrayList<T> visitedNodes = new ArrayList<T>();
       ArrayList<Edge<T>> visitedEdges = new ArrayList<>();
-      visit(from, visitedNodes, visitedEdges , graph);
+
+      found = false;
+      visit(from, to, visitedNodes, visitedEdges, graph);
       if (visitedNodes.contains(to)) {
-        return new Pathh(from, to, visitedNodes, visitedEdges , graph);
+        return new Pathh(from, to, visitedNodes, visitedEdges, graph);
       }
 
     } else {
@@ -25,14 +29,25 @@ public class DFSPathFinder<T> implements PathFinder<T> {
     return null;
   }
 
-  private void visit(T from, ArrayList<T> visitedNodes, ArrayList<Edge<T>> visitedEdges, Graph<T> graph) {
+  private void visit(T from, T to, ArrayList<T> visitedNodes, ArrayList<Edge<T>> visitedEdges, Graph<T> graph) {
     visitedNodes.add(from);
+    if (from.equals(to)) {
+      found = true;
+      return ;
+    }
     ArrayList<Edge<T>> edges = (ArrayList<Edge<T>>) graph.getEdgesFrom(from);
-    for (Edge<T> edge : edges ) {
-      visitedEdges.add(edge);
+
+    for (Edge<T> edge : edges) {
+      if(found == true) {
+        return;
+      }
       T destination = edge.getDestination();
-      if(!visitedNodes.contains(destination)) {
-        visit(destination, visitedNodes, visitedEdges, graph);
+      if (!visitedNodes.contains(destination)) {
+        visitedEdges.add(edge);
+        visit(destination, to, visitedNodes, visitedEdges, graph);
+        if (found == false) {
+          visitedEdges.remove(edge);
+        }
       }
     }
   }
