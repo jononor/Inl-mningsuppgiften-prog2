@@ -89,8 +89,8 @@ public class Gui extends Application {
     children.add(newCity);
     children.add(newConnection);
     children.add(changeConnection);
-    children.add(deleteCity);  //ny
-    children.add(moveCity);  //ny
+    children.add(deleteCity);
+    children.add(moveCity);
 
     root.setTop(top);
 
