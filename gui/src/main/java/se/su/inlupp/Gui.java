@@ -1,12 +1,10 @@
 package se.su.inlupp;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -16,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -33,9 +30,11 @@ public class Gui extends Application {
   private Label fileLabel = new Label("File");
   private Button findPath =  new Button("Find Path");
   private Button showConnection = new Button("Show Connection");
-  private Button newPlace = new Button("New Place");
+  private Button newCity = new Button("New City");
   private Button newConnection = new Button("New Connection");
   private Button changeConnection = new Button("Change Connection");
+  private Button deleteCity = new Button("Remove City");
+  private Button moveCity = new Button("Move City");
 
   /**
    * Globala variabler.
@@ -87,9 +86,12 @@ public class Gui extends Application {
     children.add(fileLabel);
     children.add(findPath);
     children.add(showConnection);
-    children.add(newPlace);
+    children.add(newCity);
     children.add(newConnection);
     children.add(changeConnection);
+    children.add(deleteCity);  //ny
+    children.add(moveCity);  //ny
+
     root.setTop(top);
 
     scene = new Scene(root);
@@ -97,15 +99,17 @@ public class Gui extends Application {
     //Stänger av alla knappar tills en bild har valts genom Labeln: File.
     findPath.setDisable(true);
     showConnection.setDisable(true);
-    newPlace.setDisable(true);
+    newCity.setDisable(true);
     newConnection.setDisable(true);
     changeConnection.setDisable(true);
+    deleteCity.setDisable(true);
+    moveCity.setDisable(true);
 
     //Sätter hanterare på alla knappar och label.
     fileLabel.setOnMousePressed(new FileLabelHandler());
     findPath.setOnAction(new FindPathHandler());
     showConnection.setOnAction(new ShowConnectionHandler());
-    newPlace.setOnAction(new NewPlaceHandler());
+    newCity.setOnAction(new NewPlaceHandler());
     newConnection.setOnAction(new NewConnectionHandler());
     changeConnection.setOnAction(new ChangeConnectionHandler());
 
@@ -135,12 +139,18 @@ public class Gui extends Application {
 
         center.getChildren().add(backgroundImage);
         root.setCenter(center);
+
+        backgroundImage.fitHeightProperty().bind(center.heightProperty());
+        backgroundImage.fitWidthProperty().bind(center.widthProperty());
+
       }
       findPath.setDisable(false);
       showConnection.setDisable(false);
-      newPlace.setDisable(false);
+      newCity.setDisable(false);
       newConnection.setDisable(false);
       changeConnection.setDisable(false);
+      deleteCity.setDisable(false);
+      moveCity.setDisable(false);
 
       stage.sizeToScene();
     }
@@ -314,7 +324,7 @@ public class Gui extends Application {
 
     @Override
     public void handle(ActionEvent event) {
-      newPlace.setDisable(true);
+      newCity.setDisable(true);
       userLookingforNewPlace = true;
       backgroundImage.setOnMouseClicked(new MapClickHandler());
     }
@@ -323,7 +333,7 @@ public class Gui extends Application {
       @Override
       public void handle(MouseEvent event) {
         if (userLookingforNewPlace == true) {
-          newPlace.setDisable(true);
+          newCity.setDisable(true);
           x = event.getX();
           y = event.getY();
 
@@ -348,7 +358,7 @@ public class Gui extends Application {
         }
 
         userLookingforNewPlace = false;
-        newPlace.setDisable(false);
+        newCity.setDisable(false);
       }
     }
   }
