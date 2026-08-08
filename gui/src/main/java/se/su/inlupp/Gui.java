@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
 
 import java.io.File;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class Gui extends Application {
@@ -72,6 +73,12 @@ public class Gui extends Application {
    */
   private MapGraph mapGraph = new MapGraph();
 
+  /**
+   * Klassen hanterar alla lines utskrivna på gui fönstret.
+   * Den har operationer för att addera, ta bort eller hämta lines på gui fönstret.
+   */
+  private ConnectionLines cLines = new ConnectionLines();
+
   public void start(Stage stage) {
     this.stage = stage;
     stage.setTitle("Pathfinder");
@@ -112,6 +119,8 @@ public class Gui extends Application {
     newCity.setOnAction(new NewPlaceHandler());
     newConnection.setOnAction(new NewConnectionHandler());
     changeConnection.setOnAction(new ChangeConnectionHandler());
+    deleteCity.setOnAction(new DeleteCityHandler());
+    moveCity.setOnAction(new MoveCityHandler());
 
     stage.setScene(scene);
     stage.show();
@@ -376,6 +385,7 @@ public class Gui extends Application {
       noMarkedPlaceAlert.setTitle("Error!");
       noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
       noMarkedPlaceAlert.showAndWait();
+      return;
       }
 
       //Felmeddelandet om två städer är redan anslutna.
@@ -422,6 +432,7 @@ public class Gui extends Application {
           Line connectionLine = new Line(firstCityMarked.getXValue(), firstCityMarked.getYValue(), secondCityMarked.getXValue(), secondCityMarked.getYValue());
           connectionLine.setStroke(Color.BLACK);
           connectionLine.setStrokeWidth(4);
+          cLines.addLine(connectionLine);
 
           mapGraph.connect(firstCityMarked, secondCityMarked, textName, weight);
           center.getChildren().add(connectionLine);
@@ -485,6 +496,81 @@ public class Gui extends Application {
       alert.getDialogPane().setMinWidth(300);
       Optional<ButtonType> result = alert.showAndWait();
     }
+  }
+
+  /**
+   * Användaren ska kunna ta bort noder (städer) ur grafen.
+   * Alla Kanter som berör den borttagna noden (städer) ska också försvinna från grafiska gränssnittet.
+   * DeleteCityHandler ansvarar för att användaren kan göra det.
+   */
+  private class DeleteCityHandler implements EventHandler<ActionEvent> {
+    @Override
+    public void handle(ActionEvent event) {
+      //Felmeddelandet om användaren inte väljer en plats på kartan.
+      if (firstCityMarked == null && secondCityMarked == null ) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("One place must be selected!");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
+
+      //Felmeddelandet om användaren inte väljer en plats på kartan.
+      if (secondCityMarked != null ) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("Only One place must be selected!");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
+
+      try {
+        mapGraph.remove(firstCityMarked);
+        for (Line line : cLines.getLines(firstCityMarked.getXValue(), firstCityMarked.getYValue())) {
+          center.getChildren().remove(line);
+        }
+        cLines.removeLine(firstCityMarked.getXValue(), firstCityMarked.getYValue());
+        center.getChildren().remove(firstCityMarked);
+        firstCityMarked = null;
+
+      } catch (NoSuchElementException e) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("The city does not exist!");
+        noMarkedPlaceAlert.showAndWait();
+      }
+    }
+  }
+
+  /**
+   * Användaren ska kunna flytta noder (städer) genom att dra dem med musen (eller annan metod)-
+   * Kanter som är kopplade till en flyttad nod (stad) skall följa med.
+   */
+  private class MoveCityHandler implements EventHandler<ActionEvent> {
+    @Override
+    public void handle(ActionEvent event) {
+      //Felmeddelandet om användaren inte väljer en plats på kartan.
+      if (firstCityMarked == null && secondCityMarked == null ) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("One place must be selected!");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
+
+      //Felmeddelandet om användaren inte väljer en plats på kartan.
+      if (secondCityMarked != null ) {
+        Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+        noMarkedPlaceAlert.setTitle("Error!");
+        noMarkedPlaceAlert.setHeaderText("Only One place must be selected!");
+        noMarkedPlaceAlert.showAndWait();
+        return;
+      }
+    }
+
+
+
+
   }
 
   /**

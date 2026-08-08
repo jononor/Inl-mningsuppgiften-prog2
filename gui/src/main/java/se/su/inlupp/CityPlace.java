@@ -9,9 +9,9 @@ public class CityPlace extends Pane {
     private final int radius = 8;
     private final Label label;
     //X koordinaten.
-    private final double xValue;
+    private double xValue;
     //Y koordinaten.
-    private final double yValue;
+    private double yValue;
 
     //En stads färg ska alltid vara blå i början
     private Color cityColor = Color.BLUE;
