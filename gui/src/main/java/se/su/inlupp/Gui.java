@@ -83,6 +83,22 @@ public class Gui extends Application {
    */
   private ConnectionLines cLines = new ConnectionLines();
 
+  /**
+   * Instanser av alla knappars handler.
+   * Istället för att skapa ny instanser.
+   * Ska fixa det!
+   * */
+  /*
+  private FileLabelHandler fileLabelHandler = new FileLabelHandler();
+  private FindPathHandler findPathHandler = new FindPathHandler();
+  private ShowConnectionHandler showConnectionHandler = new ShowConnectionHandler();
+  private NewPlaceHandler newPlaceHandler = new NewPlaceHandler();
+  private NewConnectionHandler newConnectionHandler = new NewConnectionHandler();
+  private ChangeConnectionHandler changeConnectionHandler = new ChangeConnectionHandler();
+  private DeleteCityHandler deleteCityHandler = new DeleteCityHandler();
+  private MoveCityHandler moveCityHandler = new MoveCityHandler();
+  */
+
   public void start(Stage stage) {
     this.stage = stage;
     stage.setTitle("Pathfinder");
