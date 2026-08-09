@@ -29,6 +29,9 @@ public class Gui extends Application {
    * De är globala eftersom klasser utanför start metod behöver komma åt dem.
    */
   private Label fileLabel = new Label("File");
+
+  //HBoxen Ansvarar för alla knappar
+  HBox topCenter = new HBox();
   private Button findPath =  new Button("Find Path");
   private Button showConnection = new Button("Show Connection");
   private Button newCity = new Button("New City");
@@ -85,32 +88,53 @@ public class Gui extends Application {
     root = new BorderPane();
 
     //Skapar BorderPanes top. Fyll med alla knappar och label.
-    HBox top = new HBox();
-    top.setAlignment(Pos.CENTER);
-    top.setSpacing(15);
-    top.setPadding(new Insets(10, 15, 10, 15));
-    ObservableList<Node> children = top.getChildren();
-    children.add(fileLabel);
-    children.add(findPath);
-    children.add(showConnection);
-    children.add(newCity);
-    children.add(newConnection);
-    children.add(changeConnection);
-    children.add(deleteCity);
-    children.add(moveCity);
+    //Toppen på BorderPane, knapparna och menyer
+    BorderPane top = new BorderPane();
+
+    HBox topTop = new HBox();
+    topTop.setBackground(Background.fill(Color.LIGHTGRAY));
+    topTop.setStyle("-fx-font-weight: bold;");
+    topTop.setAlignment(Pos.BOTTOM_LEFT);
+    topTop.setSpacing(2);
+    topTop.setPadding(new Insets(10, 15, 2, 6));
+    ObservableList<Node> childrenTop = topTop.getChildren();
+    childrenTop.add(fileLabel);
+
+    topCenter.setBackground(Background.fill(Color.BLACK));
+    topCenter.setStyle("-fx-font-weight: bold;");
+    topCenter.setAlignment(Pos.CENTER);
+    topCenter.setSpacing(15);
+    topCenter.setPadding(new Insets(10, 15, 10, 15));
+    ObservableList<Node> childrenTopCenter = topCenter.getChildren();
+    childrenTopCenter.add(findPath);
+    childrenTopCenter.add(showConnection);
+    childrenTopCenter.add(newCity);
+    childrenTopCenter.add(newConnection);
+    childrenTopCenter.add(changeConnection);
+    childrenTopCenter.add(deleteCity);
+    childrenTopCenter.add(moveCity);
+
+    top.setTop(topTop);
+    top.setCenter(topCenter);
 
     root.setTop(top);
-
     scene = new Scene(root);
 
     //Stänger av alla knappar tills en bild har valts genom Labeln: File.
     findPath.setDisable(true);
+    findPath.setBackground(Background.fill(Color.BLACK));
     showConnection.setDisable(true);
+    showConnection.setBackground(Background.fill(Color.BLACK));
     newCity.setDisable(true);
+    newCity.setBackground(Background.fill(Color.BLACK));
     newConnection.setDisable(true);
+    newConnection.setBackground(Background.fill(Color.BLACK));
     changeConnection.setDisable(true);
+    changeConnection.setBackground(Background.fill(Color.BLACK));
     deleteCity.setDisable(true);
+    deleteCity.setBackground(Background.fill(Color.BLACK));
     moveCity.setDisable(true);
+    moveCity.setBackground(Background.fill(Color.BLACK));
 
     //Sätter hanterare på alla knappar och label.
     fileLabel.setOnMousePressed(new FileLabelHandler());
@@ -153,14 +177,21 @@ public class Gui extends Application {
         backgroundImage.fitWidthProperty().bind(center.widthProperty());
 
       }
+      topCenter.setBackground(Background.fill(Color.STEELBLUE));
       findPath.setDisable(false);
+      findPath.setBackground(Background.fill(Color.WHITE));
       showConnection.setDisable(false);
+      showConnection.setBackground(Background.fill(Color.WHITE));
       newCity.setDisable(false);
+      newCity.setBackground(Background.fill(Color.WHITE));
       newConnection.setDisable(false);
+      newConnection.setBackground(Background.fill(Color.WHITE));
       changeConnection.setDisable(false);
+      changeConnection.setBackground(Background.fill(Color.WHITE));
       deleteCity.setDisable(false);
+      deleteCity.setBackground(Background.fill(Color.WHITE));
       moveCity.setDisable(false);
-
+      moveCity.setBackground(Background.fill(Color.WHITE));
       stage.sizeToScene();
     }
   }
