@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -361,11 +362,12 @@ public class Gui extends Application {
     private double x;
     private double y;
     private boolean userLookingforNewPlace;
-
+    //private Cursor cursor;
     @Override
     public void handle(ActionEvent event) {
       newCity.setDisable(true);
       userLookingforNewPlace = true;
+      scene.setCursor(Cursor.CROSSHAIR);
       backgroundImage.setOnMouseClicked(new MapClickHandler());
     }
 
@@ -373,6 +375,7 @@ public class Gui extends Application {
       @Override
       public void handle(MouseEvent event) {
         if (userLookingforNewPlace == true) {
+          //cursor =
           newCity.setDisable(true);
           x = event.getX();
           y = event.getY();
@@ -385,8 +388,8 @@ public class Gui extends Application {
           alert.getDialogPane().setMinWidth(300);
           Optional<ButtonType> result = alert.showAndWait();
 
-          if (result.isPresent() && result.get() == ButtonType.OK) {
-            String placeName  = name.getText();
+          String placeName  = name.getText();
+          if ((placeName != null) && (!(placeName.trim().equals(""))) && (result.isPresent() && result.get() == ButtonType.OK)) {
 
             CityPlace newCityPlace = new CityPlace(x, y, placeName);
             newCityPlace.setOnMouseClicked(cityColorHandler);
@@ -394,9 +397,15 @@ public class Gui extends Application {
             mapGraph.add(newCityPlace);
             center.getChildren().add(newCityPlace);
             center.setStyle("-fx-font-weight: bold;");
+
+          } else {
+            Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
+            noMarkedPlaceAlert.setTitle("Error!");
+            noMarkedPlaceAlert.setHeaderText("A place needs a name!");
+            noMarkedPlaceAlert.showAndWait();
           }
         }
-
+        scene.setCursor(Cursor.DEFAULT);
         userLookingforNewPlace = false;
         newCity.setDisable(false);
       }
