@@ -66,6 +66,11 @@ public class Gui extends Application {
    * Instansvariabeln används i klassen NewPlaceHandler inre klass MapKlickHandler.
    */
   private CityColorHandler cityColorHandler = new CityColorHandler();
+  /**
+   * Variabeln håller koll på om det är okej att ändra färg på en stad.
+   * Det är en global variabeln eftersom flera funktioner behöver ha tillgång till den.
+   */
+  private boolean changeColorCheck = true;
 
   /**
    * Skapar en instans av klassen MapGraph som lagras i variabeln.
@@ -87,7 +92,7 @@ public class Gui extends Application {
    * Instanser av alla knappars handler.
    * Istället för att skapa ny instanser.
    * Ska fixa det!
-   * */
+   */
   /*
   private FileLabelHandler fileLabelHandler = new FileLabelHandler();
   private FindPathHandler findPathHandler = new FindPathHandler();
@@ -615,18 +620,22 @@ public class Gui extends Application {
       }
 
       //Felmeddelandet om användaren inte väljer en plats på kartan.
-      if (secondCityMarked != null ) {
+      if (secondCityMarked != null && firstCityMarked != null ) {
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Only One place must be selected!");
         noMarkedPlaceAlert.showAndWait();
         return;
       }
+
+      changeColorCheck = false;
+
+      System.out.println("MoveCityHandler körs! firstCityMarked = " + firstCityMarked);
+      firstCityMarked.setDragCityCheck(true);
+      System.out.println("dragCityCheck satt till true!");
+
+      changeColorCheck = true;
     }
-
-
-
-
   }
 
   /**
@@ -635,23 +644,25 @@ public class Gui extends Application {
   private class CityColorHandler implements EventHandler<MouseEvent> {
     @Override
     public void handle(MouseEvent event) {
-      CityPlace current = (CityPlace) event.getSource();
-      Color color = current.getCityPlaceColor();
-      if (color == Color.RED) {
-        if (firstCityMarked == current) {
-          firstCityMarked = null;
-          current.paintCityPlaceBlue();
-        } else if (secondCityMarked == current && current != firstCityMarked) {
-          secondCityMarked = null;
-          current.paintCityPlaceBlue();
-        }
-      } else if (color == Color.BLUE) {
-        if (firstCityMarked == null) {
-          firstCityMarked = current;
-          current.paintCityPlaceRed();
-        } else if (secondCityMarked == null && current != firstCityMarked) {
-          secondCityMarked = current;
-          current.paintCityPlaceRed();
+      if (changeColorCheck == true) {
+        CityPlace current = (CityPlace) event.getSource();
+        Color color = current.getCityPlaceColor();
+        if (color == Color.RED) {
+          if (firstCityMarked == current) {
+            firstCityMarked = null;
+            current.paintCityPlaceBlue();
+          } else if (secondCityMarked == current && current != firstCityMarked) {
+            secondCityMarked = null;
+            current.paintCityPlaceBlue();
+          }
+        } else if (color == Color.BLUE) {
+          if (firstCityMarked == null) {
+            firstCityMarked = current;
+            current.paintCityPlaceRed();
+          } else if (secondCityMarked == null && current != firstCityMarked) {
+            secondCityMarked = current;
+            current.paintCityPlaceRed();
+          }
         }
       }
     }
