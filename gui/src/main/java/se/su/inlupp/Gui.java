@@ -620,7 +620,7 @@ public class Gui extends Application {
       }
 
       //Felmeddelandet om användaren inte väljer en plats på kartan.
-      if (secondCityMarked != null && firstCityMarked != null ) {
+      if (firstCityMarked != null && secondCityMarked != null ) {
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Only One place must be selected!");
@@ -628,7 +628,14 @@ public class Gui extends Application {
         return;
       }
 
+      if (firstCityMarked == null && secondCityMarked != null ) {
+        firstCityMarked = secondCityMarked;
+        secondCityMarked = null;
+      }
+
       changeColorCheck = false;
+
+      firstCityMarked.setCityLines(cLines.getLines(firstCityMarked.getXValue(), firstCityMarked.getYValue()));
 
       System.out.println("MoveCityHandler körs! firstCityMarked = " + firstCityMarked);
       firstCityMarked.setDragCityCheck(true);
