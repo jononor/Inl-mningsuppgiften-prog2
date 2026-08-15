@@ -91,9 +91,7 @@ public class Gui extends Application {
   /**
    * Instanser av alla knappars handler.
    * Istället för att skapa ny instanser.
-   * Ska fixa det!
    */
-  /*
   private FileLabelHandler fileLabelHandler = new FileLabelHandler();
   private FindPathHandler findPathHandler = new FindPathHandler();
   private ShowConnectionHandler showConnectionHandler = new ShowConnectionHandler();
@@ -102,7 +100,6 @@ public class Gui extends Application {
   private ChangeConnectionHandler changeConnectionHandler = new ChangeConnectionHandler();
   private DeleteCityHandler deleteCityHandler = new DeleteCityHandler();
   private MoveCityHandler moveCityHandler = new MoveCityHandler();
-  */
 
   public void start(Stage stage) {
     this.stage = stage;
@@ -159,14 +156,14 @@ public class Gui extends Application {
     moveCity.setBackground(Background.fill(Color.BLACK));
 
     //Sätter hanterare på alla knappar och label.
-    fileLabel.setOnMousePressed(new FileLabelHandler());
-    findPath.setOnAction(new FindPathHandler());
-    showConnection.setOnAction(new ShowConnectionHandler());
-    newCity.setOnAction(new NewPlaceHandler());
-    newConnection.setOnAction(new NewConnectionHandler());
-    changeConnection.setOnAction(new ChangeConnectionHandler());
-    deleteCity.setOnAction(new DeleteCityHandler());
-    moveCity.setOnAction(new MoveCityHandler());
+    fileLabel.setOnMousePressed(fileLabelHandler);
+    findPath.setOnAction(findPathHandler);
+    showConnection.setOnAction(showConnectionHandler);
+    newCity.setOnAction(newPlaceHandler);
+    newConnection.setOnAction(newConnectionHandler);
+    changeConnection.setOnAction(changeConnectionHandler);
+    deleteCity.setOnAction(deleteCityHandler);
+    moveCity.setOnAction(moveCityHandler);
 
     stage.setScene(scene);
     stage.show();
