@@ -21,10 +21,10 @@ import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
 
 public class Gui extends Application {
   /**
@@ -37,7 +37,7 @@ public class Gui extends Application {
 
 
   //HBoxen Ansvarar för alla knappar
-  HBox topCenter = new HBox();
+  private HBox topCenter = new HBox();
   private Button findPath =  new Button("Find Path");
   private Button showConnection = new Button("Show Connection");
   private Button newCity = new Button("New City");
@@ -56,6 +56,11 @@ public class Gui extends Application {
   private Scene scene;
   private Stage stage;
   private BorderPane root;
+
+  /**
+   * Ansvarar för att lagra filnamnet för den valda filen
+   */
+  private String fileName = "Not set yet!";
 
   /**
    * De två röda städerna som är markerade.
@@ -108,17 +113,14 @@ public class Gui extends Application {
    */
   private ConnectionLines cLines = new ConnectionLines();
 
-  /**
-   * Klassen hanterar alla Nodes utskrivna på gui fönstret.
-   * Den har operationer för att addera, ta bort eller hämta nodes på gui fönstret.
-   */
-  private NodesList nodesList = new NodesList();
+
 
   /**
    * Instanser av alla knappars handler.
    * Istället för att skapa ny instanser.
    */
   private OpenHandler openHandler = new OpenHandler();
+  private SaveHandler saveHandler = new SaveHandler();
   private FindPathHandler findPathHandler = new FindPathHandler();
   private ShowConnectionHandler showConnectionHandler = new ShowConnectionHandler();
   private NewPlaceHandler newPlaceHandler = new NewPlaceHandler();
@@ -181,6 +183,7 @@ public class Gui extends Application {
 
     //Sätter hanterare på alla knappar och la.
     newMap.setOnAction(openHandler);
+    saveMap.setOnAction(saveHandler);
     findPath.setOnAction(findPathHandler);
     showConnection.setOnAction(showConnectionHandler);
     newCity.setOnAction(newPlaceHandler);
@@ -213,6 +216,8 @@ public class Gui extends Application {
         background = new Image(file.toURI().toString());
         backgroundImage = new ImageView(background);
 
+        fileName = file.getAbsolutePath();
+
         center.getChildren().add(backgroundImage);
         root.setCenter(center);
 
@@ -235,6 +240,70 @@ public class Gui extends Application {
         moveCity.setDisable(false);
         moveCity.setBackground(Background.fill(Color.WHITE));
         stage.sizeToScene();
+      }
+    }
+  }
+
+
+  private class SaveHandler implements EventHandler<ActionEvent> {
+    @Override
+    public void handle(ActionEvent event) {
+      Set<CityPlace> cities;
+
+      TextArea textArea = new TextArea();
+      GridPane gridTextArea = new GridPane();
+      textArea.setText(fileName);
+      textArea.appendText("\n");
+      cities = mapGraph.getNodes();
+
+      Iterator<CityPlace> iterator = cities.iterator();
+      while (iterator.hasNext()) {
+        CityPlace city = iterator.next();
+        String holder = city.getPlaceName() + ";" + city.getXValue() + ";" + city.getYValue();
+        if (iterator.hasNext()) {
+          textArea.appendText(holder + ";");
+        } else {
+          textArea.appendText(holder + "\n");
+        }
+      }
+
+      for (CityPlace city : cities) {
+        edg.setEdges((List<Edge<CityPlace>>) mapGraph.getEdgesFrom(city));
+        if (edg.getSizeofEdges() > 0) {
+          for (Edge<CityPlace> edge : edg.getEdges()) {
+            edg.setEdge(edge);
+            textArea.appendText(city.getPlaceName() + ";" + edg.getDestination() + ";" + edg.getWeight() + "\n");
+          }
+        }
+      }
+
+      gridTextArea.add(textArea, 0, 0);
+      gridTextArea.setHgap(10);
+      gridTextArea.setVgap(10);
+      gridTextArea.setAlignment(Pos.CENTER);
+
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Save graph");
+      alert.setHeaderText("Save graph to a txt file");
+      alert.getDialogPane().setContent(gridTextArea);
+      alert.getDialogPane().setMinWidth(300);
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK) {
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+          try {
+            FileWriter fileWriter = new FileWriter(file);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+
+            printWriter.print(textArea.getText());
+
+            printWriter.close();
+            fileWriter.close();
+
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
       }
     }
   }
@@ -447,7 +516,6 @@ public class Gui extends Application {
             newCityPlace.setOnMouseClicked(cityColorHandler);
 
             mapGraph.add(newCityPlace);
-            nodesList.addNode(newCityPlace);
 
             center.getChildren().add(newCityPlace);
             center.setStyle("-fx-font-weight: bold;");
