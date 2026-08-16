@@ -2,7 +2,7 @@ package se.su.inlupp;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
+
 import java.util.List;
 
 public class NodesList {

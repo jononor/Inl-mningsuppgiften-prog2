@@ -25,9 +25,6 @@ import java.io.*;
 import java.util.*;
 
 public class Gui extends Application {
-  /**
-   * De här är meny valen.
-   */
   private MenuItem newMap = new MenuItem("New Map");
   private MenuItem openMap = new MenuItem("Open");
   private MenuItem saveMap = new MenuItem("Save");
