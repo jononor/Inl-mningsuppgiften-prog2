@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public class Gui extends Application {
   /**
-   * De här är meny valen
+   * De här är meny valen.
    */
   private MenuItem newMap = new MenuItem("New Map");
   private MenuItem openMap = new MenuItem("Open");
@@ -63,6 +63,12 @@ public class Gui extends Application {
   private CityPlace firstCityMarked, secondCityMarked;
 
   /**
+   * Skapar en instans av FileChooser
+   * Återanvänder instansen istället för att alltid skapa en ny FileChooser
+   */
+  private FileChooser fileChooser = new FileChooser();
+
+  /**
    * Skapar en instans av klassen CityColorHandler som lagras i variabeln.
    * Klassen hanterar vilken färg en stad ska ha.
    * Man återanvänder instansen och skapar inte nya instanser varje gång man vill bara ändra färg.
@@ -84,6 +90,15 @@ public class Gui extends Application {
    * Kolla i MapGraph om osäker.
    */
   private MapGraph mapGraph = new MapGraph();
+
+  /**
+   * Skapar en instans av klassen MapEdg som lagras i variabeln.
+   * Ideén är att återvända instansen istället för att skapa nya Edge.
+   * Edg är backend logik som inte får förekomma i Gui.
+   * Kommunikation: Gui -> MapEdg -> Edge.
+   * Kolla i MapEdg om osäker.
+   */
+  private MapEdg edg =  new MapEdg();
 
   /**
    * Klassen hanterar alla lines utskrivna på gui fönstret.
@@ -183,7 +198,7 @@ public class Gui extends Application {
     public void handle(ActionEvent event) {
       center = new Pane();
 
-      FileChooser fileChooser = new FileChooser();
+      fileChooser.setInitialDirectory(new File("."));
       File file = fileChooser.showOpenDialog(stage);
 
       if (file != null) {
@@ -196,23 +211,23 @@ public class Gui extends Application {
         backgroundImage.fitHeightProperty().bind(center.heightProperty());
         backgroundImage.fitWidthProperty().bind(center.widthProperty());
 
+        topCenter.setBackground(Background.fill(Color.STEELBLUE));
+        findPath.setDisable(false);
+        findPath.setBackground(Background.fill(Color.WHITE));
+        showConnection.setDisable(false);
+        showConnection.setBackground(Background.fill(Color.WHITE));
+        newCity.setDisable(false);
+        newCity.setBackground(Background.fill(Color.WHITE));
+        newConnection.setDisable(false);
+        newConnection.setBackground(Background.fill(Color.WHITE));
+        changeConnection.setDisable(false);
+        changeConnection.setBackground(Background.fill(Color.WHITE));
+        deleteCity.setDisable(false);
+        deleteCity.setBackground(Background.fill(Color.WHITE));
+        moveCity.setDisable(false);
+        moveCity.setBackground(Background.fill(Color.WHITE));
+        stage.sizeToScene();
       }
-      topCenter.setBackground(Background.fill(Color.STEELBLUE));
-      findPath.setDisable(false);
-      findPath.setBackground(Background.fill(Color.WHITE));
-      showConnection.setDisable(false);
-      showConnection.setBackground(Background.fill(Color.WHITE));
-      newCity.setDisable(false);
-      newCity.setBackground(Background.fill(Color.WHITE));
-      newConnection.setDisable(false);
-      newConnection.setBackground(Background.fill(Color.WHITE));
-      changeConnection.setDisable(false);
-      changeConnection.setBackground(Background.fill(Color.WHITE));
-      deleteCity.setDisable(false);
-      deleteCity.setBackground(Background.fill(Color.WHITE));
-      moveCity.setDisable(false);
-      moveCity.setBackground(Background.fill(Color.WHITE));
-      stage.sizeToScene();
     }
   }
 
@@ -302,7 +317,7 @@ public class Gui extends Application {
     private void MapPathHandler(MapPath path) {
       TextArea textArea = new TextArea();
       GridPane gridTextArea = new GridPane();
-      MapEdg edg = new MapEdg(path.getEdges());
+      edg.setEdges(path.getEdges());
 
       textArea.setText(edg.toString());
 
@@ -336,6 +351,7 @@ public class Gui extends Application {
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
         noMarkedPlaceAlert.showAndWait();
+        return;
       }
 
       //Felmeddelandet om det inte finns någon förbindelse mellan städerna.
@@ -352,8 +368,17 @@ public class Gui extends Application {
        * Fönstrets textrutor ska inte gå att redigera.
        * Om användaren klickar på "OK" eller "Avslut" i detta fönster stängs det.
        */
+       edg.setEdge(mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked));
+
+
       TextField name = new TextField();
+      name.setText(edg.getName());
+      name.setEditable(false);
+
       TextField time = new TextField();
+      time.setText(Integer.toString(edg.getWeight()));
+      time.setEditable(false);
+
 
       GridPane grid = new GridPane();
       grid.add(new Label("Name:"), 0, 0);

@@ -7,14 +7,14 @@ public class MapEdg {
 
     private Edge<CityPlace> edge;
 
-    public MapEdg(List<Edge<CityPlace>> edges) {
+    public void setEdges(List<Edge<CityPlace>> edges) {
         this.edges = edges;
     }
 
-
-    public MapEdg (Edge<CityPlace> edge) {
+    public void setEdge(Edge<CityPlace> edge) {
         this.edge = edge;
     }
+
 
     public int getWeight() {
         return edge.getWeight();
