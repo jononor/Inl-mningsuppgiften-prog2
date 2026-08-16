@@ -33,8 +33,6 @@ public class Gui extends Application {
   private MenuItem saveMap = new MenuItem("Save");
   private MenuItem exitMap = new MenuItem("Exit");
 
-
-  //HBoxen Ansvarar för alla knappar
   private HBox topCenter = new HBox();
   private Button findPath =  new Button("Find Path");
   private Button showConnection = new Button("Show Connection");
@@ -44,10 +42,6 @@ public class Gui extends Application {
   private Button deleteCity = new Button("Remove City");
   private Button moveCity = new Button("Move City");
 
-  /**
-   * Globala variabler.
-   * Som används i start metoden och de privata klasserna.
-   */
   private Image background;
   private ImageView backgroundImage;
   private Pane center;
@@ -55,69 +49,18 @@ public class Gui extends Application {
   private Stage stage;
   private BorderPane root;
 
-  /**
-   * Ansvarar för att lagra filnamnet för den valda filen
-   */
+
   private String fileName = "Not set yet!";
   private boolean unsavedChanges = false;
-
-  /**
-   * De två röda städerna som är markerade.
-   * Exempelvis om en stad är markerad röd så ligger staden i firstCityMarked variabeln.
-   * Exempelvis om två städer är markerade så ligger den andra staden i secondCityMarked variabeln.
-   */
   private CityPlace firstCityMarked, secondCityMarked;
-
-  /**
-   * Skapar en instans av FileChooser
-   * Återanvänder instansen istället för att alltid skapa en ny FileChooser
-   */
-  private FileChooser fileChooser = new FileChooser();
-
-  /**
-   * Skapar en instans av klassen CityColorHandler som lagras i variabeln.
-   * Klassen hanterar vilken färg en stad ska ha.
-   * Man återanvänder instansen och skapar inte nya instanser varje gång man vill bara ändra färg.
-   * Instansvariabeln används i klassen NewPlaceHandler inre klass MapKlickHandler.
-   */
-  private CityColorHandler cityColorHandler = new CityColorHandler();
-  /**
-   * Variabeln håller koll på om det är okej att ändra färg på en stad.
-   * Det är en global variabeln eftersom flera funktioner behöver ha tillgång till den.
-   */
   private boolean changeColorCheck = true;
 
-  /**
-   * Skapar en instans av klassen MapGraph som lagras i variabeln.
-   * Ideén är att återvända instansen istället för att skapa nya ListGraph.
-   * Klassen är en wrapper som hanterar backend ListGraph.
-   * ListGraph är backend logik som inte får förekomma i Gui.
-   * Kommunikation: Gui -> MapGraph -> ListGraph.
-   * Kolla i MapGraph om osäker.
-   */
+  private FileChooser fileChooser = new FileChooser();
+  private CityColorHandler cityColorHandler = new CityColorHandler();
   private MapGraph mapGraph = new MapGraph();
-
-  /**
-   * Skapar en instans av klassen MapEdg som lagras i variabeln.
-   * Ideén är att återvända instansen istället för att skapa nya Edge.
-   * Edg är backend logik som inte får förekomma i Gui.
-   * Kommunikation: Gui -> MapEdg -> Edge.
-   * Kolla i MapEdg om osäker.
-   */
   private MapEdg edg =  new MapEdg();
-
-  /**
-   * Klassen hanterar alla lines utskrivna på gui fönstret.
-   * Den har operationer för att addera, ta bort eller hämta lines på gui fönstret.
-   */
   private ConnectionLines cLines = new ConnectionLines();
-
   private NodesList nodesList = new NodesList();
-
-  /**
-   * Instanser av alla knappars handler.
-   * Istället för att skapa ny instanser.
-   */
   private NewMapHandler newMapHandler = new NewMapHandler();
   private OpenHandler openHandler = new OpenHandler();
   private SaveHandler saveHandler = new SaveHandler();
@@ -205,8 +148,7 @@ public class Gui extends Application {
   }
 
   /**
-   * Användaren ska kunna välja en fil som ska läggas in i BorderPane center.
-   * FileLabelHandler ansvarar för att användaren kan göra det.
+   * Meny valen, ny map, öppna en txt, spara, lämna
    */
   private class NewMapHandler implements EventHandler<ActionEvent> {
     @Override
@@ -417,20 +359,6 @@ public class Gui extends Application {
     @Override
     public void handle(ActionEvent event) {
       stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-    }
-  }
-
-  private class ExHandler implements EventHandler<WindowEvent> {
-    @Override
-    public void handle(WindowEvent event) {
-      if (unsavedChanges == true) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setContentText("Unsaved changes will be lost");
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
-          event.consume();
-        }
-      }
     }
   }
 
@@ -938,4 +866,23 @@ public class Gui extends Application {
       }
     }
   }
+
+  /**
+   * Stage exit hanterare
+   * Klassen ansvarar för att stänga
+   */
+  private class ExHandler implements EventHandler<WindowEvent> {
+    @Override
+    public void handle(WindowEvent event) {
+      if (unsavedChanges == true) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setContentText("Unsaved changes will be lost");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
+          event.consume();
+        }
+      }
+    }
+  }
+
 }
