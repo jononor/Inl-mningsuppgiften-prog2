@@ -116,22 +116,17 @@ public class Gui extends Application {
     topTop.setAlignment(Pos.BOTTOM_LEFT);
     topTop.setSpacing(2);
     topTop.setPadding(new Insets(10, 15, 2, 6));
-    ObservableList<Node> childrenTop = topTop.getChildren();
-    childrenTop.add(fileLabel);
+    topTop.getChildren().add(fileLabel);
 
     topCenter.setBackground(Background.fill(Color.BLACK));
     topCenter.setStyle("-fx-font-weight: bold;");
     topCenter.setAlignment(Pos.CENTER);
     topCenter.setSpacing(15);
     topCenter.setPadding(new Insets(10, 15, 10, 15));
-    ObservableList<Node> childrenTopCenter = topCenter.getChildren();
-    childrenTopCenter.add(findPath);
-    childrenTopCenter.add(showConnection);
-    childrenTopCenter.add(newCity);
-    childrenTopCenter.add(newConnection);
-    childrenTopCenter.add(changeConnection);
-    childrenTopCenter.add(deleteCity);
-    childrenTopCenter.add(moveCity);
+    topCenter.getChildren().addAll(findPath, showConnection, newCity, newConnection, changeConnection, deleteCity, moveCity);
+
+
+
 
     top.setTop(topTop);
     top.setCenter(topCenter);
