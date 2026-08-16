@@ -543,6 +543,7 @@ public class Gui extends Application {
         noMarkedPlaceAlert.setTitle("Error!");
         noMarkedPlaceAlert.setHeaderText("Two places must be selected!");
         noMarkedPlaceAlert.showAndWait();
+        return;
       }
 
       //Felmeddelandet om det inte finns någon förbindelse mellan städerna.
@@ -561,7 +562,12 @@ public class Gui extends Application {
        * Om användaren klickar på "OK" i fönstret sparas den nya tiden och fönstret stängs.
        * Om användaren klickar på "Cancel" stängs fönstret utan att några förändringar görs i förbindelsen.
        */
+      edg.setEdge(mapGraph.getEdgeBetween(firstCityMarked, secondCityMarked));
+
       TextField name = new TextField();
+      name.setText(edg.getName());
+      name.setEditable(false);
+
       TextField time = new TextField();
 
       GridPane grid = new GridPane();
@@ -579,6 +585,26 @@ public class Gui extends Application {
       alert.getDialogPane().setContent(grid);
       alert.getDialogPane().setMinWidth(300);
       Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK) {
+        String textTime = time.getText();
+        if (textTime.isEmpty()) {
+          Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+          alreadyConnectedAlert.setTitle("Error!");
+          alreadyConnectedAlert.setHeaderText("You muste enter a name and a time!");
+          alreadyConnectedAlert.showAndWait();
+          return;
+        }
+        try {
+          int weight = Integer.parseInt(textTime);
+          mapGraph.setConnectionWeight(firstCityMarked, secondCityMarked, weight);
+
+        } catch (Exception e) {
+          Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
+          alreadyConnectedAlert.setTitle("Error!");
+          alreadyConnectedAlert.setHeaderText("Enter only numbers");
+          alreadyConnectedAlert.showAndWait();
+        }
+      }
     }
   }
 
