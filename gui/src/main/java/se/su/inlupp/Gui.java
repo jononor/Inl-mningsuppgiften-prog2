@@ -118,7 +118,7 @@ public class Gui extends Application {
    * Instanser av alla knappars handler.
    * Istället för att skapa ny instanser.
    */
-  private FileLabelHandler fileLabelHandler = new FileLabelHandler();
+  private OpenHandler openHandler = new OpenHandler();
   private FindPathHandler findPathHandler = new FindPathHandler();
   private ShowConnectionHandler showConnectionHandler = new ShowConnectionHandler();
   private NewPlaceHandler newPlaceHandler = new NewPlaceHandler();
@@ -180,7 +180,7 @@ public class Gui extends Application {
     moveCity.setBackground(Background.fill(Color.BLACK));
 
     //Sätter hanterare på alla knappar och la.
-    newMap.setOnAction(fileLabelHandler);
+    newMap.setOnAction(openHandler);
     findPath.setOnAction(findPathHandler);
     showConnection.setOnAction(showConnectionHandler);
     newCity.setOnAction(newPlaceHandler);
@@ -201,7 +201,7 @@ public class Gui extends Application {
    * Användaren ska kunna välja en fil som ska läggas in i BorderPane center.
    * FileLabelHandler ansvarar för att användaren kan göra det.
    */
-  private class FileLabelHandler implements EventHandler<ActionEvent> {
+  private class OpenHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
       center = new Pane();
