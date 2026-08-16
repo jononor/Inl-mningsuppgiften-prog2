@@ -7,7 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
+
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -19,11 +19,9 @@ import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
+import javafx.stage.WindowEvent;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 public class Gui extends Application {
@@ -61,6 +59,7 @@ public class Gui extends Application {
    * Ansvarar för att lagra filnamnet för den valda filen
    */
   private String fileName = "Not set yet!";
+  private boolean unsavedChanges = false;
 
   /**
    * De två röda städerna som är markerade.
@@ -113,14 +112,16 @@ public class Gui extends Application {
    */
   private ConnectionLines cLines = new ConnectionLines();
 
-
+  private NodesList nodesList = new NodesList();
 
   /**
    * Instanser av alla knappars handler.
    * Istället för att skapa ny instanser.
    */
+  private NewMapHandler newMapHandler = new NewMapHandler();
   private OpenHandler openHandler = new OpenHandler();
   private SaveHandler saveHandler = new SaveHandler();
+  private ExitHandler exitHandler = new ExitHandler();
   private FindPathHandler findPathHandler = new FindPathHandler();
   private ShowConnectionHandler showConnectionHandler = new ShowConnectionHandler();
   private NewPlaceHandler newPlaceHandler = new NewPlaceHandler();
@@ -182,8 +183,10 @@ public class Gui extends Application {
     moveCity.setBackground(Background.fill(Color.BLACK));
 
     //Sätter hanterare på alla knappar och la.
-    newMap.setOnAction(openHandler);
+    newMap.setOnAction(newMapHandler);
+    openMap.setOnAction(openHandler);
     saveMap.setOnAction(saveHandler);
+    exitMap.setOnAction(exitHandler);
     findPath.setOnAction(findPathHandler);
     showConnection.setOnAction(showConnectionHandler);
     newCity.setOnAction(newPlaceHandler);
@@ -194,6 +197,7 @@ public class Gui extends Application {
 
     stage.setScene(scene);
     stage.show();
+    stage.setOnCloseRequest(new ExHandler());
   }
 
   public static void main(String[] args) {
@@ -204,7 +208,7 @@ public class Gui extends Application {
    * Användaren ska kunna välja en fil som ska läggas in i BorderPane center.
    * FileLabelHandler ansvarar för att användaren kan göra det.
    */
-  private class OpenHandler implements EventHandler<ActionEvent> {
+  private class NewMapHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
       center = new Pane();
@@ -244,6 +248,97 @@ public class Gui extends Application {
     }
   }
 
+  private class OpenHandler implements EventHandler<ActionEvent> {
+    @Override
+    public void handle(ActionEvent event) {
+      try {
+        fileChooser.setInitialDirectory(new File("."));
+      } catch (Exception e) {
+        fileChooser.setInitialDirectory(null);
+      }
+
+      File file = fileChooser.showOpenDialog(stage);
+
+      if (file != null) {
+        try {
+          center = new Pane();
+          FileReader fileReader = new FileReader(file);
+          BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+          String image =  bufferedReader.readLine();
+          background = new Image(new File(image).toURI().toString());
+          backgroundImage = new ImageView(background);
+          center.getChildren().add(backgroundImage);
+          root.setCenter(center);
+          fileName = image;
+          backgroundImage.fitHeightProperty().bind(center.heightProperty());
+          backgroundImage.fitWidthProperty().bind(center.widthProperty());
+
+          String citiesLine = bufferedReader.readLine();
+          String []citiesArr = citiesLine.split(";");
+
+          for (int index = 0; index < citiesArr.length; index += 3) {
+            String name = citiesArr[index];
+            double x = Double.parseDouble(citiesArr[index + 1]);
+            double y = Double.parseDouble(citiesArr[index + 2]);
+            CityPlace newCityPlace = new CityPlace(x, y, name);
+            newCityPlace.setOnMouseClicked(cityColorHandler);
+
+            mapGraph.add(newCityPlace);
+            nodesList.addNode(newCityPlace);
+
+            center.getChildren().add(newCityPlace);
+            center.setStyle("-fx-font-weight: bold;");
+          }
+
+          String line;
+          while ((line = bufferedReader.readLine()) != null) {
+            String[] lineArr = line.split(";");
+            String cityFrom =  lineArr[0];
+            String cityTo =  lineArr[1];
+            String edgName =  lineArr[2];
+            int edgWeight =  Integer.parseInt(lineArr[3]);
+
+            CityPlace fromCity = nodesList.getNodeByName(cityFrom);
+            CityPlace toCity = nodesList.getNodeByName(cityTo);
+
+            if (mapGraph.getEdgeBetween(fromCity, toCity) == null) {
+              mapGraph.connect(fromCity, toCity, edgName, edgWeight);
+            }
+
+            Line connectionLine = new Line(fromCity.getXValue(), fromCity.getYValue(), toCity.getXValue(), toCity.getYValue());
+            connectionLine.setStroke(Color.BLACK);
+            connectionLine.setStrokeWidth(4);
+            cLines.addLine(connectionLine);
+            center.getChildren().add(connectionLine);
+          }
+
+          topCenter.setBackground(Background.fill(Color.STEELBLUE));
+          findPath.setDisable(false);
+          findPath.setBackground(Background.fill(Color.WHITE));
+          showConnection.setDisable(false);
+          showConnection.setBackground(Background.fill(Color.WHITE));
+          newCity.setDisable(false);
+          newCity.setBackground(Background.fill(Color.WHITE));
+          newConnection.setDisable(false);
+          newConnection.setBackground(Background.fill(Color.WHITE));
+          changeConnection.setDisable(false);
+          changeConnection.setBackground(Background.fill(Color.WHITE));
+          deleteCity.setDisable(false);
+          deleteCity.setBackground(Background.fill(Color.WHITE));
+          moveCity.setDisable(false);
+          moveCity.setBackground(Background.fill(Color.WHITE));
+          stage.sizeToScene();
+
+
+          fileReader.close();
+          bufferedReader.close();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
 
   private class SaveHandler implements EventHandler<ActionEvent> {
     @Override
@@ -259,9 +354,9 @@ public class Gui extends Application {
       Iterator<CityPlace> iterator = cities.iterator();
       while (iterator.hasNext()) {
         CityPlace city = iterator.next();
-        String holder = city.getPlaceName() + ";" + city.getXValue() + ";" + city.getYValue();
+        String holder = city.getPlaceName() + ";" + city.getXValue() + ";" + city.getYValue() + ";";
         if (iterator.hasNext()) {
-          textArea.appendText(holder + ";");
+          textArea.appendText(holder);
         } else {
           textArea.appendText(holder + "\n");
         }
@@ -272,7 +367,7 @@ public class Gui extends Application {
         if (edg.getSizeofEdges() > 0) {
           for (Edge<CityPlace> edge : edg.getEdges()) {
             edg.setEdge(edge);
-            textArea.appendText(city.getPlaceName() + ";" + edg.getDestination() + ";" + edg.getWeight() + "\n");
+            textArea.appendText(city.getPlaceName() + ";" + edg.getDestination() + ";" + edg.getName() + ";" + edg.getWeight() + ";" + "\n");
           }
         }
       }
@@ -284,7 +379,7 @@ public class Gui extends Application {
 
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setTitle("Save graph");
-      alert.setHeaderText("Save graph to a txt file");
+      alert.setHeaderText("The graph need to be saved as a text file");
       alert.getDialogPane().setContent(gridTextArea);
       alert.getDialogPane().setMinWidth(300);
       Optional<ButtonType> result = alert.showAndWait();
@@ -303,6 +398,27 @@ public class Gui extends Application {
           } catch (Exception e) {
             e.printStackTrace();
           }
+        }
+      }
+    }
+  }
+
+  private class ExitHandler implements EventHandler<ActionEvent> {
+    @Override
+    public void handle(ActionEvent event) {
+      stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+    }
+  }
+
+  private class ExHandler implements EventHandler<WindowEvent> {
+    @Override
+    public void handle(WindowEvent event) {
+      if (unsavedChanges == true) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setContentText("Unsaved changes will be lost");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
+          event.consume();
         }
       }
     }
@@ -496,7 +612,6 @@ public class Gui extends Application {
       @Override
       public void handle(MouseEvent event) {
         if (userLookingforNewPlace == true) {
-          //cursor =
           newCity.setDisable(true);
           x = event.getX();
           y = event.getY();
@@ -516,9 +631,12 @@ public class Gui extends Application {
             newCityPlace.setOnMouseClicked(cityColorHandler);
 
             mapGraph.add(newCityPlace);
+            nodesList.addNode(newCityPlace);
 
             center.getChildren().add(newCityPlace);
             center.setStyle("-fx-font-weight: bold;");
+
+            unsavedChanges = true;
 
           } else {
             Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
@@ -598,6 +716,9 @@ public class Gui extends Application {
 
           mapGraph.connect(firstCityMarked, secondCityMarked, textName, weight);
           center.getChildren().add(connectionLine);
+
+          unsavedChanges = true;
+
         } catch (Exception e) {
           Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
           alreadyConnectedAlert.setTitle("Error!");
@@ -676,6 +797,8 @@ public class Gui extends Application {
           int weight = Integer.parseInt(textTime);
           mapGraph.setConnectionWeight(firstCityMarked, secondCityMarked, weight);
 
+          unsavedChanges = true;
+
         } catch (Exception e) {
           Alert alreadyConnectedAlert = new Alert(Alert.AlertType.ERROR);
           alreadyConnectedAlert.setTitle("Error!");
@@ -722,6 +845,8 @@ public class Gui extends Application {
         center.getChildren().remove(firstCityMarked);
         firstCityMarked = null;
 
+        unsavedChanges = true;
+
       } catch (NoSuchElementException e) {
         Alert noMarkedPlaceAlert = new Alert(Alert.AlertType.ERROR);
         noMarkedPlaceAlert.setTitle("Error!");
@@ -765,11 +890,12 @@ public class Gui extends Application {
 
       firstCityMarked.setCityLines(cLines.getLines(firstCityMarked.getXValue(), firstCityMarked.getYValue()));
 
-      System.out.println("MoveCityHandler körs! firstCityMarked = " + firstCityMarked);
+
       firstCityMarked.setDragCityCheck(true);
-      System.out.println("dragCityCheck satt till true!");
 
       changeColorCheck = true;
+
+      unsavedChanges = true;
     }
   }
 

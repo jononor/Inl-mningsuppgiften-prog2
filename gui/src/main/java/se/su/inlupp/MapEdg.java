@@ -5,7 +5,7 @@ import java.util.List;
 public class MapEdg {
     private List<Edge<CityPlace>> edges;
 
-    private Edge<CityPlace> edge;
+    private Edge<CityPlace> edgen;
 
     public List<Edge<CityPlace>> getEdges() {
         return edges;
@@ -20,23 +20,23 @@ public class MapEdg {
     }
 
     public void setEdge(Edge<CityPlace> edge) {
-        this.edge = edge;
+        this.edgen = edge;
     }
 
     public int getWeight() {
-        return edge.getWeight();
+        return edgen.getWeight();
     }
 
     public void setWeight(int weight) {
-        edge.setWeight(weight);
+        edgen.setWeight(weight);
     }
 
     public CityPlace getDestination() {
-        return edge.getDestination();
+        return edgen.getDestination();
     }
 
     public String getName() {
-        return edge.getName();
+        return edgen.getName();
     }
 
 

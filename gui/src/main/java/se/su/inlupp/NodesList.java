@@ -13,6 +13,15 @@ public class NodesList {
         nodes.add(node);
     }
 
+    public CityPlace getNodeByName(String name) {
+        for (CityPlace node : nodes) {
+            if (node.getPlaceName().equals(name)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
     public void removeNode(double xValue, double yValue) {
         Iterator<CityPlace> iter = nodes.iterator();
         while (iter.hasNext()) {
