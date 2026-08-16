@@ -251,6 +251,16 @@ public class Gui extends Application {
   private class OpenHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
+
+      if (unsavedChanges == true) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Warning!");
+        alert.setHeaderText("Unsaved Changes, continue anyway?");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.CANCEL) {
+          return;
+        }
+      }
       try {
         fileChooser.setInitialDirectory(new File("."));
       } catch (Exception e) {
