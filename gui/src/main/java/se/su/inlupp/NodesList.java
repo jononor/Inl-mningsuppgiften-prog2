@@ -22,28 +22,4 @@ public class NodesList {
         return null;
     }
 
-    public void removeNode(double xValue, double yValue) {
-        Iterator<CityPlace> iter = nodes.iterator();
-        while (iter.hasNext()) {
-            CityPlace city = iter.next();
-            if(city.getXValue() == xValue && city.getYValue() == yValue) {
-                iter.remove();
-            }
-        }
-    }
-
-    public List<CityPlace> getNodes() {
-        return nodes;
-    }
-
-    public List<CityPlace> getNodes(double xValue, double yValue) {
-        ArrayList<CityPlace> affectedNodes = new ArrayList<>();
-        for(CityPlace city : nodes) {
-            if(city.getXValue() == xValue && city.getYValue() == yValue) {
-                affectedNodes.add(city);
-            }
-        }
-        return affectedNodes;
-    }
-
 }
