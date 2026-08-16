@@ -21,6 +21,8 @@ import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -105,6 +107,12 @@ public class Gui extends Application {
    * Den har operationer för att addera, ta bort eller hämta lines på gui fönstret.
    */
   private ConnectionLines cLines = new ConnectionLines();
+
+  /**
+   * Klassen hanterar alla Nodes utskrivna på gui fönstret.
+   * Den har operationer för att addera, ta bort eller hämta nodes på gui fönstret.
+   */
+  private NodesList nodesList = new NodesList();
 
   /**
    * Instanser av alla knappars handler.
@@ -439,6 +447,8 @@ public class Gui extends Application {
             newCityPlace.setOnMouseClicked(cityColorHandler);
 
             mapGraph.add(newCityPlace);
+            nodesList.addNode(newCityPlace);
+
             center.getChildren().add(newCityPlace);
             center.setStyle("-fx-font-weight: bold;");
 
@@ -636,6 +646,7 @@ public class Gui extends Application {
 
       try {
         mapGraph.remove(firstCityMarked);
+
         for (Line line : cLines.getLines(firstCityMarked.getXValue(), firstCityMarked.getYValue())) {
           center.getChildren().remove(line);
         }

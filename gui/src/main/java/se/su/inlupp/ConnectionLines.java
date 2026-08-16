@@ -45,12 +45,12 @@ public class ConnectionLines {
     }
 
     public List<Line> getLines(double xValue, double yValue) {
-        ArrayList<Line> lines = new ArrayList<>();
-        for(Line line : this.lines) {
+        ArrayList<Line> affectedLines = new ArrayList<>();
+        for(Line line : lines) {
             if((line.getStartX() == xValue && line.getStartY() == yValue) || (line.getEndX() == xValue && line.getEndY() == yValue)) {
-                lines.add(line);
+                affectedLines.add(line);
             }
         }
-        return lines;
+        return affectedLines;
     }
 }
