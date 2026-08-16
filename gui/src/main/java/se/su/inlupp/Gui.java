@@ -26,10 +26,13 @@ import java.util.Optional;
 
 public class Gui extends Application {
   /**
-   * Alla knappar och labels.
-   * De är globala eftersom klasser utanför start metod behöver komma åt dem.
+   * De här är meny valen
    */
-  private Label fileLabel = new Label("File");
+  private MenuItem newMap = new MenuItem("New Map");
+  private MenuItem openMap = new MenuItem("Open");
+  private MenuItem saveMap = new MenuItem("Save");
+  private MenuItem exitMap = new MenuItem("Exit");
+
 
   //HBoxen Ansvarar för alla knappar
   HBox topCenter = new HBox();
@@ -110,13 +113,20 @@ public class Gui extends Application {
     //Toppen på BorderPane, knapparna och menyer
     BorderPane top = new BorderPane();
 
+    MenuBar menuBar = new MenuBar();
+    Menu fileMenu = new Menu("File");
+    menuBar.getMenus().addAll(fileMenu);
+    fileMenu.getItems().addAll(newMap, openMap, saveMap, exitMap);
+
     HBox topTop = new HBox();
     topTop.setBackground(Background.fill(Color.LIGHTGRAY));
     topTop.setStyle("-fx-font-weight: bold;");
     topTop.setAlignment(Pos.BOTTOM_LEFT);
     topTop.setSpacing(2);
     topTop.setPadding(new Insets(10, 15, 2, 6));
-    topTop.getChildren().add(fileLabel);
+    topTop.getChildren().add(menuBar);
+
+    top.setTop(topTop);
 
     topCenter.setBackground(Background.fill(Color.BLACK));
     topCenter.setStyle("-fx-font-weight: bold;");
@@ -125,16 +135,12 @@ public class Gui extends Application {
     topCenter.setPadding(new Insets(10, 15, 10, 15));
     topCenter.getChildren().addAll(findPath, showConnection, newCity, newConnection, changeConnection, deleteCity, moveCity);
 
-
-
-
-    top.setTop(topTop);
     top.setCenter(topCenter);
 
     root.setTop(top);
     scene = new Scene(root);
 
-    //Stänger av alla knappar tills en bild har valts genom Labeln: File.
+    //Stänger av alla knappar tills en bild har valts genom menyn.
     findPath.setDisable(true);
     findPath.setBackground(Background.fill(Color.BLACK));
     showConnection.setDisable(true);
@@ -150,8 +156,8 @@ public class Gui extends Application {
     moveCity.setDisable(true);
     moveCity.setBackground(Background.fill(Color.BLACK));
 
-    //Sätter hanterare på alla knappar och label.
-    fileLabel.setOnMousePressed(fileLabelHandler);
+    //Sätter hanterare på alla knappar och la.
+    newMap.setOnAction(fileLabelHandler);
     findPath.setOnAction(findPathHandler);
     showConnection.setOnAction(showConnectionHandler);
     newCity.setOnAction(newPlaceHandler);
@@ -172,9 +178,9 @@ public class Gui extends Application {
    * Användaren ska kunna välja en fil som ska läggas in i BorderPane center.
    * FileLabelHandler ansvarar för att användaren kan göra det.
    */
-  private class FileLabelHandler implements EventHandler<MouseEvent> {
+  private class FileLabelHandler implements EventHandler<ActionEvent> {
     @Override
-    public void handle(MouseEvent event) {
+    public void handle(ActionEvent event) {
       center = new Pane();
 
       FileChooser fileChooser = new FileChooser();
